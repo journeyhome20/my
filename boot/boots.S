@@ -51,7 +51,7 @@ protcseg:
 	jmp spin
 
 spin:
-	jmp spin
+	jmp protcseg
 
 .data
 .p2align 2
