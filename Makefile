@@ -35,6 +35,7 @@ clean:
 	
 all: $(BINDIR)$(SLASH)$(IMG)
 	make boot
+	make kernel
 	
 qemu: $(BINDIR)$(SLASH)$(IMG)
 	$(V)gnome-terminal -e "$(QEMU) -S -s -d in_asm -hda $(BINDIR)$(SLASH)$(IMG) -monitor stdio -serial null"
@@ -42,19 +43,20 @@ qemu: $(BINDIR)$(SLASH)$(IMG)
 	$(V)gnome-terminal -e "gdb -q -x tool/gdbinit"
 	
 
-$(BINDIR)$(SLASH)$(IMG) : $(BINDIR)$(SLASH)b$(SLASH)boot
+$(BINDIR)$(SLASH)$(IMG) : $(BINDIR)$(SLASH)b$(SLASH)boot $(BINDIR)$(SLASH)k$(SLASH)kernel
 	$(V)$(CC) -g -Wall -O2 -c tool/sign.c -o obj/sign.o
 	$(V)$(CC) -g -Wall -O2 obj/sign.o -o bin/sign
 	objcopy -S -O binary $(BINDIR)$(SLASH)b$(SLASH)boot $(BINDIR)$(SLASH)b$(SLASH)boot.out
 	bin/sign $(BINDIR)$(SLASH)b$(SLASH)boot.out $(BINDIR)$(SLASH)bootblock
 	dd if=/dev/zero of=$@ count=10000
 	dd if=$(BINDIR)$(SLASH)bootblock of=$@ conv=notrunc
+	dd if=$(BINDIR)$(SLASH)k$(SLASH)kernel of=$@ seek=1 conv=notrunc
 
 kernel : $(BINDIR)$(SLASH)k$(SLASH)kernel
 
 $(BINDIR)$(SLASH)k$(SLASH)kernel : $(kld)
 
-$(BINDIR)$(SLASH)kernel : $(dirkobj)
+$(BINDIR)$(SLASH)k$(SLASH)kernel : $(dirkobj)
 	@echo ++ld kernel $(dirkobj)
 	$(V)ld $(ldflags) -T $(kld) -o $@ $(dirkobj)
 	

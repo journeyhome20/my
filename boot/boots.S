@@ -47,8 +47,7 @@ protcseg:
 
 	movl $0x0, %ebp
 	movl $start, %esp
-#	call boot_start
-	jmp spin
+	call boot_start
 
 spin:
 	jmp spin
